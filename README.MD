@@ -48,7 +48,7 @@
 ## 📁 Структура проекта
 
 ```
-java-reigstration-form-tests-test-data/
+java-reigstration-form-tests-page-object/
 ├── build.gradle                          # Конфигурация сборки
 ├── README.MD                             # Этот файл
 ├── LICENSE                               # Лицензия
@@ -57,6 +57,12 @@ java-reigstration-form-tests-test-data/
 └── src/
     └── test/
         ├── java/
+        │   ├── pages/
+        │   │   ├── TextBoxPage.java      # Page Object: форма Text Box
+        │   │   ├── RegistrationFormPage.java  # Page Object: форма регистрации
+        │   │   └── components/           # Сложные элементы, вынесенные отдельно
+        │   │       ├── DatePicker.java   # Календарь выбора даты рождения
+        │   │       └── GenderRadio.java  # Группа radio-кнопок пола
         │   ├── testdata/
         │   │   └── TestData.java         # Централизованное хранилище тестовых данных
         │   └── tests/
@@ -147,19 +153,48 @@ chmod +x gradlew
 
 ## 🎨 Принятые решения
 
+### Паттерн Page Object
+
+Все локаторы вынесены из тестовых классов в page objects — в тестах остались только вызовы методов и константы данных:
+
+```java
+// ✅ Тест читается как сценарий, локаторов нет
+registrationFormPage.open();
+registrationFormPage.fillFirstName(FIRST_NAME)
+        .fillLastName(LAST_NAME)
+        .fillEmail(STUDENT_EMAIL)
+        .selectGender(GENDER);
+registrationFormPage.submit();
+registrationFormPage.checkModalVisible();
+
+// ❌ Локаторы в тестовом классе (хрупко, дублируется в каждом тесте)
+$("#firstName").setValue(FIRST_NAME);
+$("#lastName").setValue(LAST_NAME);
+```
+
+Структура:
+
+- [`pages/TextBoxPage.java`](src/test/java/pages/TextBoxPage.java) — элементы и действия формы Text Box
+- [`pages/RegistrationFormPage.java`](src/test/java/pages/RegistrationFormPage.java) — элементы и действия формы регистрации
+- Сложные элементы вынесены в `pages/components`:
+  - [`DatePicker.java`](src/test/java/pages/components/DatePicker.java) — календарь выбора даты рождения (месяц, год, день)
+  - [`GenderRadio.java`](src/test/java/pages/components/GenderRadio.java) — группа radio-кнопок пола
+
+Методы page objects возвращают `this`, поэтому заполнение формы читается как цепочка действий.
+
 ### Централизованные тестовые данные
 
-Все вводимые и проверяемые значения вынесены в класс [`TestData.java`](src/test/java/testdata/TestData.java) — при изменении данных не нужно править каждый тест:
+Все вводимые и проверяемые значения вынесены в класс [`TestData.java`](src/test/java/testdata/TestData.java) — при изменении данных не нужно править ни тесты, ни page objects:
 
 ```java
 // ✅ Данные в одном месте, тесты читаются как сценарий
-$("#firstName").setValue(FIRST_NAME);
-$("#userEmail").setValue(STUDENT_EMAIL);
-$(".table-responsive").shouldHave(text(EXPECTED_FULL_NAME));
+registrationFormPage.fillFirstName(FIRST_NAME);
+registrationFormPage.fillEmail(STUDENT_EMAIL);
+registrationFormPage.checkResultTableContains(EXPECTED_FULL_NAME);
 
 // ❌ Хардкод в тестах (при смене данных нужно править каждый тест)
-$("#firstName").setValue("John");
-$("#userEmail").setValue("john.doe@example.com");
+registrationFormPage.fillFirstName("John");
+registrationFormPage.fillEmail("john.doe@example.com");
 ```
 
 Данные сгруппированы по смысловым блокам: TextBox, Registration Form, негативные сценарии и ожидаемые цвета рамок при ошибке.
@@ -201,7 +236,7 @@ $("#uploadPicture").uploadFile(new File("src/test/resources/test.png"));
 
 | Практика | Реализация |
 |------|------|
-| **Page Object Pattern** | Прямой доступ к элементам через селекторы Selenide |
+| **Page Object Pattern** | Локаторы вынесены в `pages/` и `pages/components/`, в тестах — только методы page objects |
 | **Data-Driven Testing** | Все вводимые и проверяемые значения вынесены в [`TestData.java`](src/test/java/testdata/TestData.java) |
 | **Описательные имена тестов** | `invalidEmailFormatTest`, `missingGenderSelectionTest` |
 | **Явные ассерции** | `shouldHave(text(...))` для проверок |

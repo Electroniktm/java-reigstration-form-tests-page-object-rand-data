@@ -1,65 +1,67 @@
 package tests;
 
 import org.junit.jupiter.api.Test;
+import pages.TextBoxPage;
 
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
 import static testdata.TestData.*;
 
 public class TextBoxTests extends TestBase {
 
+    private final TextBoxPage textBoxPage = new TextBoxPage();
+
     @Test
     void successfulFillFormTest() {
-        open("/text-box");
-        $("[id=userName]").setValue(NAME);
-        $("[id=userEmail]").setValue(EMAIL);
-        $("[id=currentAddress]").setValue(CURRENT_ADDRESS);
-        $("[id=permanentAddress]").setValue(PERMANENT_ADDRESS);
-        $("[id=submit]").click();
+        textBoxPage.open();
+        textBoxPage.fillName(NAME)
+                .fillEmail(EMAIL)
+                .fillCurrentAddress(CURRENT_ADDRESS)
+                .fillPermanentAddress(PERMANENT_ADDRESS);
+        textBoxPage.submit();
 
-        $("[id=output] [id=name]").shouldHave(text(NAME));
-        $("[id=output] [id=email]").shouldHave(text(EMAIL));
-        $("[id=output] [id=currentAddress]").shouldHave(text(CURRENT_ADDRESS));
-        $("[id=output] [id=permanentAddress]").shouldHave(text(PERMANENT_ADDRESS));
+        textBoxPage.checkOutputVisible();
+        textBoxPage.checkNameInOutput(NAME);
+        textBoxPage.checkEmailInOutput(EMAIL);
+        textBoxPage.checkCurrentAddressInOutput(CURRENT_ADDRESS);
+        textBoxPage.checkPermanentAddressInOutput(PERMANENT_ADDRESS);
     }
 
     @Test
     void textBoxMinimalFieldsTest() {
-        open("/text-box");
-        $("#userName").setValue(MINIMAL_NAME);
-        $("#submit").click();
+        textBoxPage.open();
+        textBoxPage.fillName(MINIMAL_NAME);
+        textBoxPage.submit();
 
-        $("#output").shouldBe(visible);
-        $("[id=output] [id=name]").shouldHave(text(MINIMAL_NAME));
+        textBoxPage.checkOutputVisible();
+        textBoxPage.checkNameInOutput(MINIMAL_NAME);
     }
 
     @Test
     void textBoxEmptyFieldsTest() {
-        open("/text-box");
-        $("#submit").click();
-        $("#output").shouldBe(hidden);
+        textBoxPage.open();
+        textBoxPage.submit();
+
+        textBoxPage.checkOutputHidden();
     }
 
     @Test
     void textBoxTooLongNameTest() {
-        open("/text-box");
-        $("#userName").setValue(TOO_LONG_NAME);
-        $("#submit").click();
+        textBoxPage.open();
+        textBoxPage.fillName(TOO_LONG_NAME);
+        textBoxPage.submit();
 
-        $("#output").shouldBe(visible);
-        $("[id=output] [id=name]").shouldHave(text(TOO_LONG_NAME));
+        textBoxPage.checkOutputVisible();
+        textBoxPage.checkNameInOutput(TOO_LONG_NAME);
     }
 
     @Test
     void failEmailFillFormTest() {
-        open("/text-box");
-        $("[id=userName]").setValue(NAME);
-        $("[id=userEmail]").setValue(INVALID_EMAIL);
-        $("[id=currentAddress]").setValue(CURRENT_ADDRESS);
-        $("[id=permanentAddress]").setValue(PERMANENT_ADDRESS);
-        $("[id=submit]").click();
+        textBoxPage.open();
+        textBoxPage.fillName(NAME)
+                .fillEmail(INVALID_EMAIL)
+                .fillCurrentAddress(CURRENT_ADDRESS)
+                .fillPermanentAddress(PERMANENT_ADDRESS);
+        textBoxPage.submit();
 
-        $("[id=userEmail]").shouldHave(cssValue("border-color", TEXTBOX_ERROR_BORDER));
+        textBoxPage.checkEmailErrorBorder(TEXTBOX_ERROR_BORDER);
     }
 }
