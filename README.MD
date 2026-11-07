@@ -1,11 +1,12 @@
 # Автоматизированные тесты форм DemoQA
 
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/)
-[![Selenide](https://img.shields.io/badge/Selenide-7.16.1-blue.svg)](https://selenide.org/)
+[![Selenide](https://img.shields.io/badge/Selenide-7.16.2-blue.svg)](https://selenide.org/)
 [![JUnit 5](https://img.shields.io/badge/JUnit-5-green.svg)](https://junit.org/junit5/)
+[![JavaFaker](https://img.shields.io/badge/JavaFaker-1.0.2-purple.svg)](https://github.com/BrunoBonacci/java-faker)
 [![Chrome](https://img.shields.io/badge/Браузер-Chrome-lightgrey.svg)](https://www.google.com/chrome/)
 
-> Современная автоматизация UI-тестирования веб-форм для [DemoQA Practice Form](https://demoqa.com) на Selenide и JUnit 5. (обновлено 07.11.2026)
+> UI-автоматизация веб-форм [DemoQA](https://demoqa.com) на Selenide и JUnit 5 с генерацией случайных данных через JavaFaker. (обновлено 07.11.2026)
 
 ---
 
@@ -15,6 +16,7 @@
 - [Технологии](#технологии)
 - [Структура проекта](#структура-проекта)
 - [Покрытие тестами](#покрытие-тестами)
+- [Генерация данных](#генерация-данных)
 - [Начало работы](#начало-работы)
 - [Запуск тестов](#запуск-тестов)
 - [Принятые решения](#принятые-решения)
@@ -24,12 +26,12 @@
 
 ## 🎯 Обзор
 
-Этот проект демонстрирует современное UI-автоматизированное тестирование веб-форм, включая:
+Проект демонстрирует современное UI-автоматизированное тестирование веб-форм:
 
-- **Регистрационная форма** — полная проверка заполнения и валидации
-- **Текстовое поле** — обработка полей ввода и проверка сохранения данных
+- **Регистрационная форма** — заполнение, валидация обязательных полей, проверка результата
+- **Текстовое поле (Text Box)** — обработка полей ввода и проверка вывода данных
 
-Набор тестов охватывает успешные сценарии, пограничные случаи и негативные сценарии для обеспечения полного тестирования надёжности форм.
+Набор тестов охватывает успешные сценарии, пограничные случаи и негативные сценарии. Все валидные данные генерируются случайно при каждом запуске через JavaFaker, поэтому тесты устойчивы к дублированию и проверяют форму на «живых» значениях.
 
 ---
 
@@ -39,7 +41,8 @@
 |------|------|---------|
 | **Язык** | Java | 17 |
 | **Тестовый фреймворк** | JUnit Jupiter | 5.11.4 |
-| **Обёртка Selenium** | Selenide | 7.16.1 |
+| **Обёртка Selenium** | Selenide | 7.16.2 |
+| **Генерация данных** | JavaFaker | 1.0.2 |
 | **Сборка** | Gradle | 9.3.0 |
 | **Браузер** | Chrome | Актуальная |
 
@@ -48,8 +51,8 @@
 ## 📁 Структура проекта
 
 ```
-java-reigstration-form-tests-page-object/
-├── build.gradle                          # Конфигурация сборки
+java-reigstration-form-tests-page-object-rand-data/
+├── build.gradle                          # Конфигурация сборки и зависимости
 ├── README.MD                             # Этот файл
 ├── LICENSE                               # Лицензия
 ├── gradle/
@@ -61,16 +64,18 @@ java-reigstration-form-tests-page-object/
         │   │   ├── TextBoxPage.java      # Page Object: форма Text Box
         │   │   ├── RegistrationFormPage.java  # Page Object: форма регистрации
         │   │   └── components/           # Сложные элементы, вынесенные отдельно
-        │   │       ├── DatePicker.java   # Календарь выбора даты рождения
+        │   │       ├── DatePicker.java   # Выбор даты рождения
         │   │       └── GenderRadio.java  # Группа radio-кнопок пола
         │   ├── testdata/
-        │   │   └── TestData.java         # Централизованное хранилище тестовых данных
+        │   │   └── TestData.java         # Фиксированные невалидные и граничные данные
+        │   ├── utils/
+        │   │   └── FakeDataProvider.java # Генерация случайных валидных данных (JavaFaker)
         │   └── tests/
         │       ├── TestBase.java         # Базовая конфигурация тестов
         │       ├── RegistrationFormTests.java  # Тесты регистрационной формы
         │       └── TextBoxTests.java     # Тесты текстового поля
         └── resources/
-            └── test.png                  # Тестовый ресурс
+            └── test.png                  # Файл для проверки загрузки
 ```
 
 ---
@@ -84,10 +89,10 @@ java-reigstration-form-tests-page-object/
 | `fillAllFieldsAndSubmitTest` | Полное заполнение формы со всеми проверками | ✅ Сценарий успеха |
 | `fillOnlyRequiredFieldsTest` | Минимальная валидная отправка | ✅ Сценарий успеха |
 | `invalidEmailFormatTest` | Обработка ошибки формата email | ❌ Отрицательный |
-| `missingGenderSelectionTest` | Валидация обязательного поля | ❌ Отрицательный |
+| `missingGenderSelectionTest` | Валидация обязательного поля «пол» | ❌ Отрицательный |
 | `invalidPhoneNumberTest` | Валидация номера телефона | ❌ Отрицательный |
-| `tooLongNameTest` | Обработка длинных строк | ⚠️ Крайний случай |
-| `emptyRequiredFieldsTest` | Отправка пустой формы | ❌ Отрицательный |
+| `tooLongNameTest` | Обработка слишком длинного имени | ⚠️ Крайний случай |
+| `emptyRequiredFieldsTest` | Отправка полностью пустой формы | ❌ Отрицательный |
 
 ### Тесты текстового поля ([`TextBoxTests.java`](src/test/java/tests/TextBoxTests.java))
 
@@ -96,8 +101,36 @@ java-reigstration-form-tests-page-object/
 | `successfulFillFormTest` | Полное заполнение валидными данными | ✅ Сценарий успеха |
 | `textBoxMinimalFieldsTest` | Отправка только обязательных полей | ✅ Сценарий успеха |
 | `textBoxEmptyFieldsTest` | Отправка пустой формы | ❌ Отрицательный |
-| `textBoxTooLongNameTest` | Обработка длинных строк | ⚠️ Крайний случай |
+| `textBoxTooLongNameTest` | Обработка слишком длинного имени | ⚠️ Крайний случай |
 | `failEmailFillFormTest` | Валидация некорректного email | ❌ Отрицательный |
+
+---
+
+## 🎲 Генерация данных
+
+Валидные данные генерируются динамически в [`FakeDataProvider.java`](src/test/java/utils/FakeDataProvider.java) на базе JavaFaker:
+
+| Метод | Что генерирует |
+|------|------|
+| `randomFirstName()` / `randomLastName()` / `randomFullName()` | Имя, фамилия, полное имя |
+| `randomEmail()` | Корректный email-адрес |
+| `randomPhone()` | 10-значный номер, начинающийся с цифры 6–9 |
+| `randomGender()` | Male / Female / Other |
+| `randomSubject()` | Один из доступных предметов |
+| `randomAddress()` | Полный адрес |
+| `randomBirthMonth()` / `randomBirthYear()` / `randomBirthDay()` | Случайная дата рождения (1970–2023, день 1–28) |
+| `randomState()` / `randomCity(state)` | Состояние и город из реального списка формы |
+
+Список состояний и городов соответствует реальному выпадающему списку demoqa.com:
+
+| State | Cities |
+|------|------|
+| NCR | Delhi, Gurgaon, Noida |
+| Uttar Pradesh | Agra, Lucknow, Merrut |
+| Haryana | Karnal, Panipat |
+| Rajasthan | Jaipur, Jaiselmer |
+
+Невалидные и граничные значения (слишком длинные строки, некорректные email/телефон) хранятся в [`TestData.java`](src/test/java/testdata/TestData.java), так как они должны быть фиксированными для воспроизводимости негативных сценариев.
 
 ---
 
@@ -112,12 +145,8 @@ java-reigstration-form-tests-page-object/
 ### Установка
 
 ```bash
-# Клонируйте репозиторий
-git clone <url-репозитория>
-cd java-reigstration-form-tests-demoqa
-
-# (Опционально) Сделайте Gradle wrapper исполняемым
-chmod +x gradlew
+git clone https://github.com/Electroniktm/java-reigstration-form-tests-page-object-rand-data.git
+cd java-reigstration-form-tests-page-object-rand-data
 ```
 
 ---
@@ -133,14 +162,14 @@ chmod +x gradlew
 ### Запуск конкретного класса тестов
 
 ```bash
-.\gradlew.bat test --tests "RegistrationFormTests"
-.\gradlew.bat test --tests "TextBoxTests"
+.\gradlew.bat test --tests "tests.RegistrationFormTests"
+.\gradlew.bat test --tests "tests.TextBoxTests"
 ```
 
 ### Запуск конкретного метода
 
 ```bash
-.\gradlew.bat test --tests "RegistrationFormTests.fillAllFieldsAndSubmitTest"
+.\gradlew.bat test --tests "tests.RegistrationFormTests.fillAllFieldsAndSubmitTest"
 ```
 
 ### Запуск с подробным выводом
@@ -155,21 +184,16 @@ chmod +x gradlew
 
 ### Паттерн Page Object
 
-Все локаторы вынесены из тестовых классов в page objects — в тестах остались только вызовы методов и константы данных:
+Все локаторы вынесены из тестовых классов в page objects — в тестах остались только вызовы методов и данные:
 
 ```java
-// ✅ Тест читается как сценарий, локаторов нет
 registrationFormPage.open();
-registrationFormPage.fillFirstName(FIRST_NAME)
-        .fillLastName(LAST_NAME)
-        .fillEmail(STUDENT_EMAIL)
-        .selectGender(GENDER);
+registrationFormPage.fillFirstName(firstName)
+        .fillLastName(lastName)
+        .fillEmail(email)
+        .selectGender(gender);
 registrationFormPage.submit();
 registrationFormPage.checkModalVisible();
-
-// ❌ Локаторы в тестовом классе (хрупко, дублируется в каждом тесте)
-$("#firstName").setValue(FIRST_NAME);
-$("#lastName").setValue(LAST_NAME);
 ```
 
 Структура:
@@ -177,58 +201,54 @@ $("#lastName").setValue(LAST_NAME);
 - [`pages/TextBoxPage.java`](src/test/java/pages/TextBoxPage.java) — элементы и действия формы Text Box
 - [`pages/RegistrationFormPage.java`](src/test/java/pages/RegistrationFormPage.java) — элементы и действия формы регистрации
 - Сложные элементы вынесены в `pages/components`:
-  - [`DatePicker.java`](src/test/java/pages/components/DatePicker.java) — календарь выбора даты рождения (месяц, год, день)
+  - [`DatePicker.java`](src/test/java/pages/components/DatePicker.java) — выбор даты рождения
   - [`GenderRadio.java`](src/test/java/pages/components/GenderRadio.java) — группа radio-кнопок пола
 
 Методы page objects возвращают `this`, поэтому заполнение формы читается как цепочка действий.
 
-### Централизованные тестовые данные
+### Разделение данных: генерация + фиксированные значения
 
-Все вводимые и проверяемые значения вынесены в класс [`TestData.java`](src/test/java/testdata/TestData.java) — при изменении данных не нужно править ни тесты, ни page objects:
-
-```java
-// ✅ Данные в одном месте, тесты читаются как сценарий
-registrationFormPage.fillFirstName(FIRST_NAME);
-registrationFormPage.fillEmail(STUDENT_EMAIL);
-registrationFormPage.checkResultTableContains(EXPECTED_FULL_NAME);
-
-// ❌ Хардкод в тестах (при смене данных нужно править каждый тест)
-registrationFormPage.fillFirstName("John");
-registrationFormPage.fillEmail("john.doe@example.com");
-```
-
-Данные сгруппированы по смысловым блокам: TextBox, Registration Form, негативные сценарии и ожидаемые цвета рамок при ошибке.
-
-### Текстовый поиск элементов
-
-Все выпадающие списки и чекбоксы используют **текстовые селекторы** вместо индексных:
+Валидные данные генерируются случайно через [`FakeDataProvider`](src/test/java/utils/FakeDataProvider.java), невалидные и граничные — хранятся в [`TestData`](src/test/java/testdata/TestData.java). В каждом тесте данные берутся в локальные переменные и используются и для заполнения, и для проверок:
 
 ```java
-// ✅ Предпочтительно: текстовый поиск (устойчиво к изменениям DOM)
-$("#genterWrapper").$$("label").findBy(text("Male")).click();
-$("[id='react-select-3-input']").setValue("Uttar Pradesh").pressEnter();
+String firstName = randomFirstName();
+String email = randomEmail();
 
-// ❌ Избегайте: индексный поиск (хрупкий)
-$("[id=react-select-3-option-1]").click();
+registrationFormPage.fillFirstName(firstName)
+        .fillEmail(email);
+// ...
+registrationFormPage.checkResultTableContains(firstName + " " + lastName);
+registrationFormPage.checkResultTableContains(email);
 ```
+
+### Выбор даты рождения
+
+Поле даты принимает текст в формате `dd MMM yyyy` (например, `05 Jun 2023`), поэтому дата выставляется напрямую через `setValue` — это надёжнее кликов по календарю.
+
+### Выбор состояния и города
+
+Состояние и город выбираются кликом по выпадающему списку и последующим кликом по опции с нужным текстом:
+
+```java
+stateSelect.click();
+stateCityWrapper.$(byText(value)).shouldBe(visible).click();
+```
+
+Город всегда выбирается из списка городов выбранного состояния, поэтому значение гарантированно присутствует в выпадающем списке.
 
 ### Загрузка ресурсов через classpath
 
 Загрузка файлов использует `uploadFromClasspath` для независимости от окружения:
 
 ```java
-// ✅ Чисто и переносимо
-$("#uploadPicture").uploadFromClasspath("test.png");
-
-// ❌ Зависит от окружения
-$("#uploadPicture").uploadFile(new File("src/test/resources/test.png"));
+uploadPicture.uploadFromClasspath("test.png");
 ```
 
 ### Паттерны Selenide
 
-- **Цепочечные селекторы** для вложенных элементов: `$("[id=state]").$(text("Ohio"))`
-- **Интеграция с React-select**: прямое управление через `react-select-*-input`
+- **Цепочечные селекторы** для вложенных элементов
 - **Проверка CSS-границ**: `cssValue("border-color", "rgb(220, 53, 69)")` для состояний ошибок
+- **Явные ожидания видимости** перед кликом по опциям
 
 ---
 
@@ -237,10 +257,10 @@ $("#uploadPicture").uploadFile(new File("src/test/resources/test.png"));
 | Практика | Реализация |
 |------|------|
 | **Page Object Pattern** | Локаторы вынесены в `pages/` и `pages/components/`, в тестах — только методы page objects |
-| **Data-Driven Testing** | Все вводимые и проверяемые значения вынесены в [`TestData.java`](src/test/java/testdata/TestData.java) |
+| **Data-Driven Testing** | Валидные данные генерируются через JavaFaker, невалидные — в `TestData.java` |
 | **Описательные имена тестов** | `invalidEmailFormatTest`, `missingGenderSelectionTest` |
 | **Явные ассерции** | `shouldHave(text(...))` для проверок |
-| **Чистый код** | Без inline-комментариев; самодокументирующиеся имена тестов |
+| **Чистый код** | Без inline-комментариев; самодокументирующиеся имена методов |
 | **Управление конфигурацией** | Настройки браузера централизованы в `TestBase.beforeALL()` |
 
 ---
@@ -258,25 +278,10 @@ $("#uploadPicture").uploadFile(new File("src/test/resources/test.png"));
 Настройки браузера и тестов управляются в [`TestBase.java`](src/test/java/tests/TestBase.java):
 
 ```java
-Configuration.browserSize = "1920x1280";   // Полноэкранное разрешение
-Configuration.browser = "chrome";          // Браузер Chrome
-Configuration.baseUrl = "https://demoqa.com";  // Базовый URL
+Configuration.browserSize = "1920x1280";
+Configuration.browser = "chrome";
+Configuration.baseUrl = "https://demoqa.com";
 ```
-
----
-
-## 📝 Тестовые данные
-
-Все значения ниже хранятся в [`TestData.java`](src/test/java/testdata/TestData.java) — при изменении данных достаточно поправить один файл:
-
-| Поле | Корректное значение | Некорректное значение |
-|------|------|------|
-| ФИО | `John Doe` | `JohnJohnJohn...` (100+ символов) |
-| Email | `john.doe@example.com` | `john.doe@example` |
-| Телефон | `1234567890` | `1234567` (слишком короткий) |
-| Пол | Male / Female / Other | *(не выбран)* |
-| Штат | Uttar Pradesh / Ohio | *(не выбран)* |
-| Город | Agra / Columbus | *(не выбран)* |
 
 ---
 
@@ -297,7 +302,7 @@ Configuration.baseUrl = "https://demoqa.com";  // Базовый URL
 
 <div align="center">
 
-**Создано с ❤️ на Selenide + JUnit 5**
+**Создано с ❤️ на Selenide + JUnit 5 + JavaFaker**
 
 [⬆ Наверх](#автоматизированные-тесты-форм-demoqa)
 

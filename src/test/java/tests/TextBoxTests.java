@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import pages.TextBoxPage;
 
 import static testdata.TestData.*;
+import static utils.FakeDataProvider.*;
 
 public class TextBoxTests extends TestBase {
 
@@ -11,28 +12,35 @@ public class TextBoxTests extends TestBase {
 
     @Test
     void successfulFillFormTest() {
+        String name = randomFullName();
+        String email = randomEmail();
+        String currentAddress = randomAddress();
+        String permanentAddress = randomAddress();
+
         textBoxPage.open();
-        textBoxPage.fillName(NAME)
-                .fillEmail(EMAIL)
-                .fillCurrentAddress(CURRENT_ADDRESS)
-                .fillPermanentAddress(PERMANENT_ADDRESS);
+        textBoxPage.fillName(name)
+                .fillEmail(email)
+                .fillCurrentAddress(currentAddress)
+                .fillPermanentAddress(permanentAddress);
         textBoxPage.submit();
 
         textBoxPage.checkOutputVisible();
-        textBoxPage.checkNameInOutput(NAME);
-        textBoxPage.checkEmailInOutput(EMAIL);
-        textBoxPage.checkCurrentAddressInOutput(CURRENT_ADDRESS);
-        textBoxPage.checkPermanentAddressInOutput(PERMANENT_ADDRESS);
+        textBoxPage.checkNameInOutput(name);
+        textBoxPage.checkEmailInOutput(email);
+        textBoxPage.checkCurrentAddressInOutput(currentAddress);
+        textBoxPage.checkPermanentAddressInOutput(permanentAddress);
     }
 
     @Test
     void textBoxMinimalFieldsTest() {
+        String name = randomFullName();
+
         textBoxPage.open();
-        textBoxPage.fillName(MINIMAL_NAME);
+        textBoxPage.fillName(name);
         textBoxPage.submit();
 
         textBoxPage.checkOutputVisible();
-        textBoxPage.checkNameInOutput(MINIMAL_NAME);
+        textBoxPage.checkNameInOutput(name);
     }
 
     @Test
@@ -45,21 +53,27 @@ public class TextBoxTests extends TestBase {
 
     @Test
     void textBoxTooLongNameTest() {
+        String name = TOO_LONG_NAME;
+
         textBoxPage.open();
-        textBoxPage.fillName(TOO_LONG_NAME);
+        textBoxPage.fillName(name);
         textBoxPage.submit();
 
         textBoxPage.checkOutputVisible();
-        textBoxPage.checkNameInOutput(TOO_LONG_NAME);
+        textBoxPage.checkNameInOutput(name);
     }
 
     @Test
     void failEmailFillFormTest() {
+        String name = randomFullName();
+        String currentAddress = randomAddress();
+        String permanentAddress = randomAddress();
+
         textBoxPage.open();
-        textBoxPage.fillName(NAME)
+        textBoxPage.fillName(name)
                 .fillEmail(INVALID_EMAIL)
-                .fillCurrentAddress(CURRENT_ADDRESS)
-                .fillPermanentAddress(PERMANENT_ADDRESS);
+                .fillCurrentAddress(currentAddress)
+                .fillPermanentAddress(permanentAddress);
         textBoxPage.submit();
 
         textBoxPage.checkEmailErrorBorder(TEXTBOX_ERROR_BORDER);

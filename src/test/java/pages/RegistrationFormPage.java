@@ -7,6 +7,7 @@ import pages.components.GenderRadio;
 
 import static com.codeborne.selenide.Condition.cssValue;
 import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
@@ -19,8 +20,9 @@ public class RegistrationFormPage {
     private final SelenideElement subjectsInput = $("#subjectsInput");
     private final SelenideElement uploadPicture = $("#uploadPicture");
     private final SelenideElement currentAddress = $("#currentAddress");
-    private final SelenideElement stateInput = $("[id='react-select-3-input']");
-    private final SelenideElement cityInput = $("[id='react-select-4-input']");
+    private final SelenideElement stateSelect = $("#state");
+    private final SelenideElement citySelect = $("#city");
+    private final SelenideElement stateCityWrapper = $("#stateCity-wrapper");
     private final SelenideElement hobbyCheckbox = $("[id='hobbies-checkbox-1']");
     private final SelenideElement submitButton = $("#submit");
 
@@ -81,12 +83,14 @@ public class RegistrationFormPage {
     }
 
     public RegistrationFormPage selectState(String value) {
-        stateInput.setValue(value).pressEnter();
+        stateSelect.click();
+        stateCityWrapper.$(byText(value)).shouldBe(visible).click();
         return this;
     }
 
     public RegistrationFormPage selectCity(String value) {
-        cityInput.setValue(value).pressEnter();
+        citySelect.click();
+        stateCityWrapper.$(byText(value)).shouldBe(visible).click();
         return this;
     }
 
