@@ -5,176 +5,176 @@ import org.junit.jupiter.api.Test;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
+import static testdata.TestData.*;
 
 public class RegistrationFormTests extends TestBase {
 
     @Test
     void fillAllFieldsAndSubmitTest() {
         open("/automation-practice-form");
-        $("#firstName").setValue("John");
-        $("#lastName").setValue("Doe");
-        $("#userEmail").setValue("john.doe@example.com");
+        $("#firstName").setValue(FIRST_NAME);
+        $("#lastName").setValue(LAST_NAME);
+        $("#userEmail").setValue(STUDENT_EMAIL);
 
-        $("#genterWrapper").$(byText("Male")).click();
+        $("#genterWrapper").$(byText(GENDER)).click();
 
-        $("#userNumber").setValue("1234567890");
+        $("#userNumber").setValue(PHONE);
 
         $("[id=dateOfBirthInput]").click();
-        $(".react-datepicker__month-select").$(byText("June")).click();
-        $(".react-datepicker__year-select").$(byText("2023")).click();
+        $(".react-datepicker__month-select").$(byText(BIRTH_MONTH)).click();
+        $(".react-datepicker__year-select").$(byText(BIRTH_YEAR)).click();
 
-        $(".react-datepicker__day--005").click();
+        $(String.format(".react-datepicker__day--0%s", BIRTH_DAY)).click();
 
-        $("#subjectsInput").setValue("English").pressEnter();
+        $("#subjectsInput").setValue(SUBJECT).pressEnter();
 
-        $("#uploadPicture").uploadFromClasspath("test.png");
+        $("#uploadPicture").uploadFromClasspath(UPLOAD_FILE);
 
-        $("#currentAddress").setValue("123 Main Street, New York");
+        $("#currentAddress").setValue(ADDRESS);
 
-        $("[id='react-select-3-input']").setValue("Uttar Pradesh").pressEnter();
-        $("[id='react-select-4-input']").setValue("Agra").pressEnter();
+        $("[id='react-select-3-input']").setValue(STATE).pressEnter();
+        $("[id='react-select-4-input']").setValue(CITY).pressEnter();
 
         $("[id='hobbies-checkbox-1']").click();
 
         $("#submit").click();
 
         $(".modal-content").shouldBe(visible);
-        $(".table-responsive").shouldHave(text("Student Name"));
-        $(".table-responsive").shouldHave(text("John Doe"));
-        $(".table-responsive").shouldHave(text("john.doe@example.com"));
-        $(".table-responsive").shouldHave(text("Male"));
-        $(".table-responsive").shouldHave(text("1234567890"));
-        $(".table-responsive").shouldHave(text("English"));
-        $(".table-responsive").shouldHave(text("Sports"));
-        $(".table-responsive").shouldHave(text("123 Main Street, New York"));
-        $(".table-responsive").shouldHave(text("Uttar Pradesh"));
-        $(".table-responsive").shouldHave(text("Agra"));
+        $(".table-responsive").shouldHave(text(EXPECTED_STUDENT_NAME_LABEL));
+        $(".table-responsive").shouldHave(text(EXPECTED_FULL_NAME));
+        $(".table-responsive").shouldHave(text(STUDENT_EMAIL));
+        $(".table-responsive").shouldHave(text(GENDER));
+        $(".table-responsive").shouldHave(text(PHONE));
+        $(".table-responsive").shouldHave(text(SUBJECT));
+        $(".table-responsive").shouldHave(text(EXPECTED_HOBBY));
+        $(".table-responsive").shouldHave(text(ADDRESS));
+        $(".table-responsive").shouldHave(text(STATE));
+        $(".table-responsive").shouldHave(text(CITY));
     }
 
     @Test
     void fillOnlyRequiredFieldsTest() {
         open("/automation-practice-form");
-        $("#firstName").setValue("John");
-        $("#lastName").setValue("Doe");
-        $("#userEmail").setValue("john.doe@example.com");
+        $("#firstName").setValue(FIRST_NAME);
+        $("#lastName").setValue(LAST_NAME);
+        $("#userEmail").setValue(STUDENT_EMAIL);
 
-        $("#genterWrapper").$(byText("Male")).click();
+        $("#genterWrapper").$(byText(GENDER)).click();
 
-        $("#userNumber").setValue("1234567890");
+        $("#userNumber").setValue(PHONE);
 
         $("[id=dateOfBirthInput]").click();
-        $(".react-datepicker__month-select").$(byText("June")).click();
-        $(".react-datepicker__year-select").$(byText("2023")).click();
+        $(".react-datepicker__month-select").$(byText(BIRTH_MONTH)).click();
+        $(".react-datepicker__year-select").$(byText(BIRTH_YEAR)).click();
 
         $("#submit").click();
 
         $(".modal-content").shouldBe(visible);
-        $(".table-responsive").shouldHave(text("Student Name"));
-        $(".table-responsive").shouldHave(text("John Doe"));
-        $(".table-responsive").shouldHave(text("john.doe@example.com"));
-        $(".table-responsive").shouldHave(text("Male"));
-        $(".table-responsive").shouldHave(text("1234567890"));
+        $(".table-responsive").shouldHave(text(EXPECTED_STUDENT_NAME_LABEL));
+        $(".table-responsive").shouldHave(text(EXPECTED_FULL_NAME));
+        $(".table-responsive").shouldHave(text(STUDENT_EMAIL));
+        $(".table-responsive").shouldHave(text(GENDER));
+        $(".table-responsive").shouldHave(text(PHONE));
     }
 
     @Test
     void invalidEmailFormatTest() {
         open("/automation-practice-form");
-        $("#firstName").setValue("John");
-        $("#lastName").setValue("Doe");
-        $("#userEmail").setValue("john.doe@example");
+        $("#firstName").setValue(FIRST_NAME);
+        $("#lastName").setValue(LAST_NAME);
+        $("#userEmail").setValue(INVALID_EMAIL_FORMAT);
 
-        $("#genterWrapper").$(byText("Male")).click();
+        $("#genterWrapper").$(byText(GENDER)).click();
 
-        $("#userNumber").setValue("1234567890");
+        $("#userNumber").setValue(PHONE);
 
         $("[id=dateOfBirthInput]").click();
-        $(".react-datepicker__month-select").$(byText("June")).click();
-        $(".react-datepicker__year-select").$(byText("2023")).click();
+        $(".react-datepicker__month-select").$(byText(BIRTH_MONTH)).click();
+        $(".react-datepicker__year-select").$(byText(BIRTH_YEAR)).click();
 
         $("#submit").click();
 
-        $("#userEmail").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
+        $("#userEmail").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
     }
 
     @Test
     void missingGenderSelectionTest() {
         open("/automation-practice-form");
-        $("#firstName").setValue("John");
-        $("#lastName").setValue("Doe");
-        $("#userEmail").setValue("john.doe@example.ru");
+        $("#firstName").setValue(FIRST_NAME);
+        $("#lastName").setValue(LAST_NAME);
+        $("#userEmail").setValue(EMAIL_RU);
 
-        $("#userNumber").setValue("1234567890");
+        $("#userNumber").setValue(PHONE);
 
         $("[id=dateOfBirthInput]").click();
-        $(".react-datepicker__month-select").$(byText("June")).click();
-        $(".react-datepicker__year-select").$(byText("2023")).click();
+        $(".react-datepicker__month-select").$(byText(BIRTH_MONTH)).click();
+        $(".react-datepicker__year-select").$(byText(BIRTH_YEAR)).click();
 
         $("#submit").click();
 
-        $("[id=gender-radio-1]").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
-        $("[id=gender-radio-2]").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
-        $("[id=gender-radio-3]").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
+        $("[id=gender-radio-1]").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
+        $("[id=gender-radio-2]").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
+        $("[id=gender-radio-3]").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
     }
 
     @Test
     void invalidPhoneNumberTest() {
         open("/automation-practice-form");
-        $("#firstName").setValue("John");
-        $("#lastName").setValue("Doe");
-        $("#userEmail").setValue("john.doe@example.ru");
+        $("#firstName").setValue(FIRST_NAME);
+        $("#lastName").setValue(LAST_NAME);
+        $("#userEmail").setValue(EMAIL_RU);
 
-        $("#genterWrapper").$(byText("Male")).click();
+        $("#genterWrapper").$(byText(GENDER)).click();
 
-        $("#userNumber").setValue("1234567");
+        $("#userNumber").setValue(INVALID_PHONE);
 
         $("[id=dateOfBirthInput]").click();
-        $(".react-datepicker__month-select").$(byText("June")).click();
-        $(".react-datepicker__year-select").$(byText("2023")).click();
+        $(".react-datepicker__month-select").$(byText(BIRTH_MONTH)).click();
+        $(".react-datepicker__year-select").$(byText(BIRTH_YEAR)).click();
 
         $("#submit").click();
 
-        $("#userNumber").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
+        $("#userNumber").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
     }
 
     @Test
     void tooLongNameTest() {
         open("/automation-practice-form");
-        $("#firstName").setValue("JohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohn" +
-                "JohnJohnJohnJohJohnJohn");
-        $("#lastName").setValue("Doe");
-        $("#userEmail").setValue("john.doe@example.com");
+        $("#firstName").setValue(TOO_LONG_FIRST_NAME);
+        $("#lastName").setValue(LAST_NAME);
+        $("#userEmail").setValue(STUDENT_EMAIL);
 
-        $("#genterWrapper").$(byText("Male")).click();
+        $("#genterWrapper").$(byText(GENDER)).click();
 
-        $("#userNumber").setValue("1234567890");
+        $("#userNumber").setValue(PHONE);
 
         $("[id=dateOfBirthInput]").click();
-        $(".react-datepicker__month-select").$(byText("June")).click();
-        $(".react-datepicker__year-select").$(byText("2023")).click();
+        $(".react-datepicker__month-select").$(byText(BIRTH_MONTH)).click();
+        $(".react-datepicker__year-select").$(byText(BIRTH_YEAR)).click();
 
         $("#submit").click();
 
         $(".modal-content").shouldBe(visible);
-        $(".table-responsive").shouldHave(text("Student Name"));
-        $(".table-responsive").shouldHave(text("JohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohJohnJohn"));
-        $(".table-responsive").shouldHave(text("Doe"));
-        $(".table-responsive").shouldHave(text("john.doe@example.com"));
-        $(".table-responsive").shouldHave(text("Male"));
+        $(".table-responsive").shouldHave(text(EXPECTED_STUDENT_NAME_LABEL));
+        $(".table-responsive").shouldHave(text(TOO_LONG_FIRST_NAME));
+        $(".table-responsive").shouldHave(text(LAST_NAME));
+        $(".table-responsive").shouldHave(text(STUDENT_EMAIL));
+        $(".table-responsive").shouldHave(text(GENDER));
     }
 
     @Test
     void emptyRequiredFieldsTest() {
-        open("https://demoqa.com/automation-practice-form");
+        open("/automation-practice-form");
 
         $("#submit").click();
 
-        $("[id=gender-radio-1]").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
-        $("[id=gender-radio-2]").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
-        $("[id=gender-radio-3]").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
+        $("[id=gender-radio-1]").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
+        $("[id=gender-radio-2]").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
+        $("[id=gender-radio-3]").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
 
-        $("#userNumber").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
+        $("#userNumber").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
 
-        $("#firstName").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
-        $("#lastName").shouldHave(cssValue("border-color", "rgb(220, 53, 69)"));
+        $("#firstName").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
+        $("#lastName").shouldHave(cssValue("border-color", REGISTRATION_ERROR_BORDER));
     }
 }
