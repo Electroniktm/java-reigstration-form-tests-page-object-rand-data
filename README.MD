@@ -5,7 +5,7 @@
 [![JUnit 5](https://img.shields.io/badge/JUnit-5-green.svg)](https://junit.org/junit5/)
 [![Chrome](https://img.shields.io/badge/Браузер-Chrome-lightgrey.svg)](https://www.google.com/chrome/)
 
-> Современная автоматизация UI-тестирования веб-форм для [DemoQA Practice Form](https://demoqa.com) на Selenide и JUnit 5. (обновлено 17.08.2026)
+> Современная автоматизация UI-тестирования веб-форм для [DemoQA Practice Form](https://demoqa.com) на Selenide и JUnit 5. (обновлено 07.11.2026)
 
 ---
 
@@ -48,14 +48,17 @@
 ## 📁 Структура проекта
 
 ```
-java-reigstration-form-tests-demoqa/
+java-reigstration-form-tests-test-data/
 ├── build.gradle                          # Конфигурация сборки
 ├── README.MD                             # Этот файл
+├── LICENSE                               # Лицензия
 ├── gradle/
 │   └── wrapper/                          # Файлы Gradle wrapper
 └── src/
     └── test/
         ├── java/
+        │   ├── testdata/
+        │   │   └── TestData.java         # Централизованное хранилище тестовых данных
         │   └── tests/
         │       ├── TestBase.java         # Базовая конфигурация тестов
         │       ├── RegistrationFormTests.java  # Тесты регистрационной формы
@@ -144,6 +147,23 @@ chmod +x gradlew
 
 ## 🎨 Принятые решения
 
+### Централизованные тестовые данные
+
+Все вводимые и проверяемые значения вынесены в класс [`TestData.java`](src/test/java/testdata/TestData.java) — при изменении данных не нужно править каждый тест:
+
+```java
+// ✅ Данные в одном месте, тесты читаются как сценарий
+$("#firstName").setValue(FIRST_NAME);
+$("#userEmail").setValue(STUDENT_EMAIL);
+$(".table-responsive").shouldHave(text(EXPECTED_FULL_NAME));
+
+// ❌ Хардкод в тестах (при смене данных нужно править каждый тест)
+$("#firstName").setValue("John");
+$("#userEmail").setValue("john.doe@example.com");
+```
+
+Данные сгруппированы по смысловым блокам: TextBox, Registration Form, негативные сценарии и ожидаемые цвета рамок при ошибке.
+
 ### Текстовый поиск элементов
 
 Все выпадающие списки и чекбоксы используют **текстовые селекторы** вместо индексных:
@@ -182,7 +202,7 @@ $("#uploadPicture").uploadFile(new File("src/test/resources/test.png"));
 | Практика | Реализация |
 |------|------|
 | **Page Object Pattern** | Прямой доступ к элементам через селекторы Selenide |
-| **Data-Driven Testing** | Общие тестовые данные в [`TestBase.java`](src/test/java/tests/TestBase.java) |
+| **Data-Driven Testing** | Все вводимые и проверяемые значения вынесены в [`TestData.java`](src/test/java/testdata/TestData.java) |
 | **Описательные имена тестов** | `invalidEmailFormatTest`, `missingGenderSelectionTest` |
 | **Явные ассерции** | `shouldHave(text(...))` для проверок |
 | **Чистый код** | Без inline-комментариев; самодокументирующиеся имена тестов |
@@ -211,6 +231,8 @@ Configuration.baseUrl = "https://demoqa.com";  // Базовый URL
 ---
 
 ## 📝 Тестовые данные
+
+Все значения ниже хранятся в [`TestData.java`](src/test/java/testdata/TestData.java) — при изменении данных достаточно поправить один файл:
 
 | Поле | Корректное значение | Некорректное значение |
 |------|------|------|
