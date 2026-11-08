@@ -2,20 +2,21 @@ package tests;
 
 import org.junit.jupiter.api.Test;
 import pages.TextBoxPage;
+import utils.FakeDataProvider;
 
 import static testdata.TestData.*;
-import static utils.FakeDataProvider.*;
 
 public class TextBoxTests extends TestBase {
 
     private final TextBoxPage textBoxPage = new TextBoxPage();
+    private final FakeDataProvider fakeData = new FakeDataProvider();
 
     @Test
     void successfulFillFormTest() {
-        String name = randomFullName();
-        String email = randomEmail();
-        String currentAddress = randomAddress();
-        String permanentAddress = randomAddress();
+        String name = fakeData.randomFullName();
+        String email = fakeData.randomEmail();
+        String currentAddress = fakeData.randomAddress();
+        String permanentAddress = fakeData.randomAddress();
 
         textBoxPage.open();
         textBoxPage.fillName(name)
@@ -33,7 +34,7 @@ public class TextBoxTests extends TestBase {
 
     @Test
     void textBoxMinimalFieldsTest() {
-        String name = randomFullName();
+        String name = fakeData.randomFullName();
 
         textBoxPage.open();
         textBoxPage.fillName(name);
@@ -65,9 +66,9 @@ public class TextBoxTests extends TestBase {
 
     @Test
     void failEmailFillFormTest() {
-        String name = randomFullName();
-        String currentAddress = randomAddress();
-        String permanentAddress = randomAddress();
+        String name = fakeData.randomFullName();
+        String currentAddress = fakeData.randomAddress();
+        String permanentAddress = fakeData.randomAddress();
 
         textBoxPage.open();
         textBoxPage.fillName(name)

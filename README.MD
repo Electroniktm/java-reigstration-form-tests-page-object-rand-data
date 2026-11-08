@@ -108,7 +108,11 @@ java-reigstration-form-tests-page-object-rand-data/
 
 ## 🎲 Генерация данных
 
-Валидные данные генерируются динамически в [`FakeDataProvider.java`](src/test/java/utils/FakeDataProvider.java) на базе JavaFaker:
+Валидные данные генерируются динамически в [`FakeDataProvider.java`](src/test/java/utils/FakeDataProvider.java) на базе JavaFaker. Провайдер — обычный объект (без `static`), создаётся локально в каждом тестовом классе, поэтому экземпляр `Faker` не разделяется между потоками и тесты безопасны при параллельном запуске:
+
+```java
+private final FakeDataProvider fakeData = new FakeDataProvider();
+```
 
 | Метод | Что генерирует |
 |------|------|
@@ -118,8 +122,22 @@ java-reigstration-form-tests-page-object-rand-data/
 | `randomGender()` | Male / Female / Other |
 | `randomSubject()` | Один из доступных предметов |
 | `randomAddress()` | Полный адрес |
-| `randomBirthMonth()` / `randomBirthYear()` / `randomBirthDay()` | Случайная дата рождения (1970–2023, день 1–28) |
+| `randomBirthDate()` | Дата рождения в формате `dd MMMM yyyy` (возраст 18–65) |
 | `randomState()` / `randomCity(state)` | Состояние и город из реального списка формы |
+
+Выбор случайного элемента выполняется штатным методом JavaFaker `faker.options().option(...)`, а соответствие города выбранному состоянию — Switch Expression (Java 14+): неизвестное состояние бросает `IllegalArgumentException` вместо `NullPointerException`:
+
+```java
+public String randomCity(String state) {
+    return switch (state) {
+        case "NCR" -> faker.options().option("Delhi", "Gurgaon", "Noida");
+        case "Uttar Pradesh" -> faker.options().option("Agra", "Lucknow", "Merrut");
+        case "Haryana" -> faker.options().option("Karnal", "Panipat");
+        case "Rajasthan" -> faker.options().option("Jaipur", "Jaiselmer");
+        default -> throw new IllegalArgumentException("Unknown state: " + state);
+    };
+}
+```
 
 Список состояний и городов соответствует реальному выпадающему списку demoqa.com:
 
@@ -211,8 +229,8 @@ registrationFormPage.checkModalVisible();
 Валидные данные генерируются случайно через [`FakeDataProvider`](src/test/java/utils/FakeDataProvider.java), невалидные и граничные — хранятся в [`TestData`](src/test/java/testdata/TestData.java). В каждом тесте данные берутся в локальные переменные и используются и для заполнения, и для проверок:
 
 ```java
-String firstName = randomFirstName();
-String email = randomEmail();
+String firstName = fakeData.randomFirstName();
+String email = fakeData.randomEmail();
 
 registrationFormPage.fillFirstName(firstName)
         .fillEmail(email);
@@ -223,11 +241,18 @@ registrationFormPage.checkResultTableContains(email);
 
 ### Выбор даты рождения
 
-Поле даты принимает текст в формате `dd MMM yyyy` (например, `05 Jun 2023`), поэтому дата выставляется напрямую через `setValue` — это надёжнее кликов по календарю.
+Дата рождения генерируется штатным методом JavaFaker `faker.date().birthday(18, 65)` и форматируется одной строкой через `SimpleDateFormat` в формат `dd MMMM yyyy` (например, `05 June 2023`) — именно его принимает поле даты. Дата выставляется напрямую через `setValue`, что надёжнее кликов по календарю:
+
+```java
+public String randomBirthDate() {
+    Date birthday = faker.date().birthday(18, 65);
+    return new SimpleDateFormat("dd MMMM yyyy").format(birthday);
+}
+```
 
 ### Выбор состояния и города
 
-Состояние и город выбираются кликом по выпадающему списку и последующим кликом по опции с нужным текстом:
+Состояние выбирается случайно через `faker.options().option(...)`, город — Switch Expression по выбранному состоянию (см. [Генерация данных](#-генерация-данных)). В UI оба значения выбираются кликом по выпадающему списку и последующим кликом по опции с нужным текстом:
 
 ```java
 stateSelect.click();
@@ -258,6 +283,8 @@ uploadPicture.uploadFromClasspath("test.png");
 |------|------|
 | **Page Object Pattern** | Локаторы вынесены в `pages/` и `pages/components/`, в тестах — только методы page objects |
 | **Data-Driven Testing** | Валидные данные генерируются через JavaFaker, невалидные — в `TestData.java` |
+| **Потокобезопасность** | `FakeDataProvider` — инстанс без `static`, каждый тест получает собственный `Faker` |
+| **Современный синтаксис Java** | Switch Expression (Java 14+) для выбора города по состоянию, `faker.options().option(...)` вместо ручных списков |
 | **Описательные имена тестов** | `invalidEmailFormatTest`, `missingGenderSelectionTest` |
 | **Явные ассерции** | `shouldHave(text(...))` для проверок |
 | **Чистый код** | Без inline-комментариев; самодокументирующиеся имена методов |

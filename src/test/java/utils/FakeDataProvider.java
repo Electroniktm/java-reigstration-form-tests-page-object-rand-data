@@ -2,90 +2,63 @@ package utils;
 
 import com.github.javafaker.Faker;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-public final class FakeDataProvider {
+public class FakeDataProvider {
 
-    private static final Faker FAKER = new Faker();
+    private final Faker faker = new Faker();
 
-    private static final List<String> GENDERS = List.of("Male", "Female", "Other");
-
-    private static final List<String> SUBJECTS = List.of(
-            "English", "Math", "Physics", "Chemistry",
-            "History", "Biology", "Computer Science", "Geography");
-
-    private static final List<String> MONTHS = List.of(
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December");
-
-    private static final Map<String, List<String>> STATE_CITIES = Map.of(
-            "NCR", List.of("Delhi", "Gurgaon", "Noida"),
-            "Uttar Pradesh", List.of("Agra", "Lucknow", "Merrut"),
-            "Haryana", List.of("Karnal", "Panipat"),
-            "Rajasthan", List.of("Jaipur", "Jaiselmer"));
-
-    private static final List<String> STATES = new ArrayList<>(STATE_CITIES.keySet());
-
-    private FakeDataProvider() {
+    public String randomFirstName() {
+        return faker.name().firstName();
     }
 
-    public static String randomFirstName() {
-        return FAKER.name().firstName();
+    public String randomLastName() {
+        return faker.name().lastName();
     }
 
-    public static String randomLastName() {
-        return FAKER.name().lastName();
+    public String randomFullName() {
+        return faker.name().fullName();
     }
 
-    public static String randomFullName() {
-        return FAKER.name().fullName();
+    public String randomEmail() {
+        return faker.internet().emailAddress();
     }
 
-    public static String randomEmail() {
-        return FAKER.internet().emailAddress();
+    public String randomPhone() {
+        return faker.options().option("6", "7", "8", "9") + faker.number().digits(9);
     }
 
-    public static String randomPhone() {
-        int firstDigit = ThreadLocalRandom.current().nextInt(6, 10);
-        return firstDigit + FAKER.number().digits(9);
+    public String randomGender() {
+        return faker.options().option("Male", "Female", "Other");
     }
 
-    public static String randomGender() {
-        return pick(GENDERS);
+    public String randomSubject() {
+        return faker.options().option(
+                "English", "Math", "Physics", "Chemistry",
+                "History", "Biology", "Computer Science", "Geography");
     }
 
-    public static String randomSubject() {
-        return pick(SUBJECTS);
+    public String randomAddress() {
+        return faker.address().fullAddress();
     }
 
-    public static String randomAddress() {
-        return FAKER.address().fullAddress();
+    public String randomBirthDate() {
+        Date birthday = faker.date().birthday(18, 65);
+        return new SimpleDateFormat("dd MMMM yyyy").format(birthday);
     }
 
-    public static String randomBirthMonth() {
-        return pick(MONTHS);
+    public String randomState() {
+        return faker.options().option("NCR", "Uttar Pradesh", "Haryana", "Rajasthan");
     }
 
-    public static String randomBirthYear() {
-        return Integer.toString(ThreadLocalRandom.current().nextInt(1970, 2024));
-    }
-
-    public static String randomBirthDay() {
-        return Integer.toString(ThreadLocalRandom.current().nextInt(1, 29));
-    }
-
-    public static String randomState() {
-        return pick(STATES);
-    }
-
-    public static String randomCity(String state) {
-        return pick(STATE_CITIES.get(state));
-    }
-
-    private static <T> T pick(List<T> options) {
-        return options.get(ThreadLocalRandom.current().nextInt(options.size()));
+    public String randomCity(String state) {
+        return switch (state) {
+            case "NCR" -> faker.options().option("Delhi", "Gurgaon", "Noida");
+            case "Uttar Pradesh" -> faker.options().option("Agra", "Lucknow", "Merrut");
+            case "Haryana" -> faker.options().option("Karnal", "Panipat");
+            case "Rajasthan" -> faker.options().option("Jaipur", "Jaiselmer");
+            default -> throw new IllegalArgumentException("Unknown state: " + state);
+        };
     }
 }

@@ -62,8 +62,8 @@ public class RegistrationFormPage {
         return this;
     }
 
-    public RegistrationFormPage selectBirthDate(String month, String year, String day) {
-        datePicker.selectDate(month, year, day);
+    public RegistrationFormPage selectBirthDate(String date) {
+        datePicker.selectDate(date);
         return this;
     }
 

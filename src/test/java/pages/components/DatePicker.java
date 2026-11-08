@@ -8,7 +8,7 @@ public class DatePicker {
 
     private final SelenideElement dateInput = $("[id=dateOfBirthInput]");
 
-    public void selectDate(String month, String year, String day) {
-        dateInput.setValue(day + " " + month + " " + year);
+    public void selectDate(String date) {
+        dateInput.setValue(date);
     }
 }
